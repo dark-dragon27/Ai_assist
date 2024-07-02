@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Assist</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fast-text-language-detector@1.0.0/dist/language-detector.min.js"></script> <!-- Add fast-text language detector library -->
+    <script type="text/javascript">
+        $(document).ready(function() {
+            var recognition;
+            $('#mic-button').click(function() {
+                if (!('webkitSpeechRecognition' in window)) {
+                    alert("Speech recognition is not supported by this browser.");
+                } else {
+                    recognition = new webkitSpeechRecognition();
+                    recognition.continuous = false;
+                    recognition.interimResults = false;
+                    recognition.lang = 'en-US';
+                    recognition.start();
+
+                    recognition.onresult = function(event) {
+                        var result = event.results[0][0].transcript;
+                        var lang = detectLanguage(result);
+                        if (lang === 'ta') {
+                            recognition.lang = 'ta-IN';
+                        } else {
+                            recognition.lang = 'en-US';
+                        }
+                        $('#text-input').val(result);
+                        $('#speech-form').submit();
+                    };
+
+                    recognition.onerror = function(event) {
+                        alert("Error occurred in recognition: " + event.error);
+                    };
+
+                    recognition.onend = function() {
+                        recognition.stop();
+                    };
+                }
+            });
+
+            async function detectLanguage(text) {
+                // Use fast-text language detector to detect the language of the text
+                var detector = new LanguageDetector();
+                var detectedLang = await detector.detect(text);
+                return detectedLang[0].lang;
+            }
+        });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        form {
+            margin-top: 20px;
+            text-align: center;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+        }
+        button[type="submit"] {
+            background-color: #444141;
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            border: none;
+        }
+        button[type="submit"]:hover {
+            background-image: linear-gradient(90deg, #53cbef 0%, #dcc66c 50%, #ffa3b6 75%, #53cbef 100%);
+            animation: slidernbw 5s linear infinite;
+            color: #000;
+        }
+        @keyframes slidernbw {
+            to {
+                background-position: 20vw;
+            }
+        }
+        h2 {
+            margin-top: 20px;
+            color: #333;
+        }
+        p {
+            font-size: 18px;
+        }
+        /* CSS Styles for Audio Player */
+        audio {
+            display: block;
+            margin: 20px auto;
+        }
+        audio::-webkit-media-controls-panel {
+            background-color: #f4f4f4;
+            border-radius: 4px;
+        }
+        audio::-webkit-media-controls-play-button {
+            display: none;
+        }
+        audio::-webkit-media-controls-start-playback-button {
+            display: none;
+        }
+        audio::-webkit-media-controls-volume-slider {
+            width: 80px;
+        }
+        audio::-webkit-media-controls-volume-slider-container {
+            display: flex;
+            align-items: center;
+        }
+        audio::-webkit-media-controls-timeline {
+            height: 4px;
+            background-color: #ddd;
+        }
+        audio::-webkit-media-controls-current-time-display,
+        audio::-webkit-media-controls-time-remaining-display {
+            font-size: 14px;
+            color: #333;
+            margin: 0 10px;
+        }
+        audio::-webkit-media-controls-mute-button,
+        audio::-webkit-media-controls-timeline-container {
+            display: none;
+        }
+        /* CSS Styles for Results Box */
+        .results-box {
+            background-color: #000;
+            color: #fff;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        /* Additional style for microphone icon */
+        #mic-button {
+            background-color: #444141;
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+            padding: 15px 15px 15px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        #mic-button:hover {
+            background-image: linear-gradient(90deg, #53cbef 0%, #dcc66c 50%, #ffa3b6 75%, #53cbef 100%);
+            animation: slidernbw 5s linear infinite;
+            color: #000;
+        }
+        #mic-button i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+    </style>
+    <!-- Set favicon moon logo -->
+    <link rel="shortcut icon" type="image/png" href="https://img.icons8.com/ios-filled/50/000000/moon-symbol.png"/>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <h1>AI Assist</h1>
+    <br>
+    <br>
+    <form id="speech-form" action="/" method="POST">
+        <input type="text" name="search" id="text-input" placeholder="Enter a value">
+        <button type="submit" id="search-button">Search</button>
+        <button id="mic-button" type="button">
+            <i class="fas fa-microphone"></i>
+        </button>
+    </form>
+    {% if result %}
+        <h2>Result:</h2>
+        <div class="results-box">
+            <p>{{ result }}</p>
+        </div>
+        {% if audio_url %}
+            <audio controls autoplay>
+                <source src="{{ audio_url }}" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+        {% endif %}
+    {% endif %}
+</body>
+</html>

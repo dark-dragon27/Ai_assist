@@ -1,0 +1,5 @@
+bardapi==0.1.25
+firebase==4.0.1
+firebase_admin==6.2.0
+Flask==2.3.2
+pyttsx3==2.90
